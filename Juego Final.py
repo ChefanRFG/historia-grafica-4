@@ -4,35 +4,29 @@ import sys
 pygame.init()
 
 WIDTH, HEIGHT = 1960, 960
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-
+WHITE, BLACK = (255, 255, 255), (0, 0, 0)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Novela Gráfica Undercaves")
 
-images = {
-    "img_inicial": pygame.transform.scale(pygame.image.load("0.png"), (WIDTH, HEIGHT)),
-    "img_cueva": pygame.transform.scale(pygame.image.load("1.png"), (WIDTH, HEIGHT)),
-    "img_prota": pygame.transform.scale(pygame.image.load("2.png"), (WIDTH, HEIGHT)),
-    "img_ciudad": pygame.transform.scale(pygame.image.load("3.png"), (WIDTH, HEIGHT)),
-    "img_puesto": pygame.transform.scale(pygame.image.load("4.png"), (WIDTH, HEIGHT)),
-    "img_castillo": pygame.transform.scale(pygame.image.load("5.png"), (WIDTH, HEIGHT)),
-    "img_monstruo_de_caballeria": pygame.transform.scale(pygame.image.load("6.png"), (WIDTH, HEIGHT)),
-    "img_espada_legendaria": pygame.transform.scale(pygame.image.load("7.png"), (WIDTH, HEIGHT)),
-    "img_monstruo_boss": pygame.transform.scale(pygame.image.load("8.png"), (WIDTH, HEIGHT)),
-    "img_monstruo_boss_2": pygame.transform.scale(pygame.image.load("10.png"), (WIDTH, HEIGHT)),
-    "img_boss_caballero_monstruo": pygame.transform.scale(pygame.image.load("11.png"), (WIDTH, HEIGHT)),
-    "img_los_caballeros_del_destino": pygame.transform.scale(pygame.image.load("12.png"), (WIDTH, HEIGHT)),
-    "img_boss_final_caballero_obscuro": pygame.transform.scale(pygame.image.load("13.png"), (WIDTH, HEIGHT)),
-    "img_campo_de_batalla_final": pygame.transform.scale(pygame.image.load("14.png"), (WIDTH, HEIGHT))
-}
+def load_image(name):
+    try:
+        return pygame.transform.scale(pygame.image.load(name), (WIDTH, HEIGHT))
+    except pygame.error as e:
+        print(f"Error al cargar la imagen {name}: {e}")
+        return None
 
-# Fuente de texto
-font = pygame.font.Font(None, 36)
+images = {name: load_image(f"{i}.png") for i, name in enumerate([
+    "img_inicial", "img_cueva", "img_prota", "img_ciudad", "img_puesto",
+    "img_castillo", "img_monstruo_de_caballeria", "img_espada_legendaria",
+    "img_monstruo_boss", "img_monstruo_boss_2", "img_boss_caballero_monstruo",
+    "img_los_caballeros_del_destino", "img_boss_final_caballero_obscuro",
+    "img_campo_de_batalla_final"
+])}
+
+font = pygame.font.Font(None, 30)
 
 def draw_text(text, x, y):
-    text_surface = font.render(text, True, WHITE)
-    screen.blit(text_surface, (x, y))
+    screen.blit(font.render(text, True, WHITE), (x, y))
 
 class GameState:
     def __init__(self):
@@ -44,107 +38,167 @@ class GameState:
                 self.handle_key_1()
             elif event.key == pygame.K_2:
                 self.handle_key_2()
-    
+
     def handle_key_1(self):
-        if self.state == "Iniciar el Crono":
-            self.state = "buscar una salida"
-        elif self.state == "buscar una salida":
-            self.state = "Rendirte ante el frio"
-        elif self.state == "Explorar las catacumbas abandonadas del sub-suelo, (CAERLEON)":
-            self.state = "Ir hacia la luz"
-        elif self.state == "Rendirte ante el frio":
-            self.state = "Moriste congelado"
-        elif self.state == "Ir hacia la luz":
-            self.state = "Ir a comer algo al puesto de comida"
-        elif self.state == "Ir a comer algo al puesto de comida":
-            self.state = "Fuiste a comer al puesto de comida, eventualmente te sentiste mal y explotaste."
-        elif self.state == "Ir hacia el castillo a investigar sobre el pueblo":
-            self.state = "Hablar con el monstruo"
-        elif self.state == "Hablar con el monstruo":
-            self.state = ""
+        transitions = {
+            "Iniciar el Crono": "buscar una salida",
+            "buscar una salida": "Rendirte ante el frio",
+            "Explorar las catacumbas abandonadas del sub-suelo, (CAERLEON)": "Ir hacia la luz",
+            "Rendirte ante el frio": "Moriste congelado",
+            "Ir hacia la luz": "Ir a comer algo al puesto de comida",
+            "Ir a comer algo al puesto de comida": "Fuiste a comer al puesto de comida, eventualmente te sentiste mal y explotaste.",
+            "Ir hacia el castillo a investigar sobre el pueblo": "Hablar con el monstruo",
+            "Hablar con el monstruo": "Ayudar con la profesia",
+            "Ayudar con la profesia": "Ir hacia el rey",
+            "Ir hacia el rey": "Continuar tu camino",
+            "Continuar tu camino": "Esperar al rey",
+            "Esperar al rey": "Ayudar a eliminar la corrupción",
+            "Ayudar a eliminar la corrupción": "Ir a cumplir tu mision...",
+            "Ir a cumplir tu mision...": "Proclamarse vicrtorioso...",
+            "Proclamarse vicrtorioso...": "Legendary Ending. Victoria...",
+            "Retroceder para buscar la salida": "Aceptar su invitacion",
+            "Aceptar su invitacion": "Sientes como se consume tu alma, el caballero se hace mas poderoso..."
+        }
+        self.state = transitions.get(self.state, self.state)
 
-
-
-        
-    
     def handle_key_2(self):
-        if self.state == "Iniciar el Crono":
-            self.state = "Explorar las catacumbas abandonadas del sub-suelo, (CAERLEON)"
-        elif self.state == "buscar una salida":
-            self.state = "Seguir buscando una salida"
-        elif self.state == "Explorar las catacumbas abandonadas del sub-suelo, (CAERLEON)":
-            self.state = "Retroceder para buscar la salida"
-        elif self.state == "Ir hacia la luz":
-            self.state = "Ir hacia el castillo a investigar sobre el pueblo"
-        elif self.state == "Ir hacia el castillo a investigar sobre el pueblo":
-            self.state = "Intentar pelear con el con tus habilidades magicas"
-        elif self.state == "":
-            self.state = ""
-        elif self.state == "":
-            self.state = ""
-
+        transitions = {
+            "Iniciar el Crono": "Explorar las catacumbas abandonadas del sub-suelo, (CAERLEON)",
+            "buscar una salida": "Seguir buscando una salida",
+            "Explorar las catacumbas abandonadas del sub-suelo, (CAERLEON)": "Retroceder para buscar la salida",
+            "Ir hacia la luz": "Ir hacia el castillo a investigar sobre el pueblo",
+            "Ir hacia el castillo a investigar sobre el pueblo": "Intentar pelear con el con tus habilidades mágicas",
+            "Intentar pelear con el con tus habilidades mágicas": "El monstruo acabó contigo en tan solo un movimiento de brazo, patético",
+            "Hablar con el monstruo": "Irse del lugar",
+            "Irse del lugar": "Decides irte sin embargo el monstruo te ataca con su arma atravesándote",
+            "Esperar al rey": "Negarse ya que no tienes nada que ver con ese reino",
+            "Negarse ya que no tienes nada que ver con ese reino": "Al escuchar esto el rey le ordena a tu guardia de tu ejecucion",
+            "Seguir buscando una salida": "A pesar de tu desespere de buscar la salida te perdiste en el vacio de la fronteras",
+            "Retroceder para buscar la salida": "Caballero desconocido: hey, que haces aca pequeño humano?",
+            "Caballero desconocido: hey, que haces aca pequeño humano?": "Rechazar su oferta",
+            "Rechazar su oferta": "Ah, es una lastima, total iba a consumir tu alma..."
+        }
+        self.state = transitions.get(self.state, self.state)
 
     def show(self):
         screen.fill(BLACK)
-        if self.state == "Iniciar el Crono":
-            screen.blit(images["img_inicial"], (0, 0))
-            draw_text("Caiste de una altura muy alta, estas conmocionado y parece que estas herido internamente", 30, 300)
-            draw_text("Recuerdas quien eres de golpe, Zhongli, exacto, eres el heroe legendario de la superficie", 30, 330)
-            draw_text("Zhongli: claro, ahora lo rexcuerdo, estaba de expedicion cuando una brecha de portal me absorbio al sub-suelo, es bastante diferente a las leyendas...", 30, 360)
-            draw_text("Zhongli: Bueno, *ahhhh* sera mejor que comience a caminar por aca, hace bastante frio a decir verdad...", 30, 390)
-            draw_text("Opciones del destino", 50, 500)
-            draw_text("1. Buscar una salida", 50, 550)
-            draw_text("2. Explorar las catacumbas abandonadas del sub-suelo, (CAERLEON)", 50, 600)
-        elif self.state == "buscar una salida":
-            screen.blit(images["img_cueva"], (0, 0))
-            draw_text("Te perdiste buscando la salida, sientes el frio comenzando a afectarte poco a poco...", 50, 100)
-            draw_text("1. Rendirte ante el frio", 50, 150)
-            draw_text("2. Seguir buscando una salida", 50, 200)
-        elif self.state == "Explorar las catacumbas abandonadas del sub-suelo, (CAERLEON)":
-            screen.blit(images["img_cueva"], (0, 0))
-            draw_text("Ves una luz al final de el tunel, deseas ir hacia ella?", 50, 100)
-            draw_text("1. Ir hacia la luz", 50, 150)
-            draw_text("2. Retroceder para buscar la salida", 50, 200)
-        elif self.state == "Rendirte ante el frio":
-            draw_text("Moriste congelado", 50, 50)
-        elif self.state == "Ir hacia la luz":
-            screen.blit(images["img_ciudad"], (0, 0))
-            draw_text("Caes encima de la ciudad, es enorme y repleta de monstruos como personas, ves un puesto de comida a lo lejos y un castillo algo tetrico", 50, 100)
-            draw_text("1. Ir a comer algo al puesto de comida", 50, 100)
-            draw_text("2. Ir hacia el castillo a investigar sobre el pueblo",50, 100)
-        elif self.state == "Ir a comer algo al puesto de comida":
-            screen.blit(images["img_puesto"], (0, 0))
-            draw_text("Fuiste a comer al puesto de comida, eventualmente te sentiste mal y explotaste.", 50, 100)
-        elif self.state == "Ir hacia el castillo a investigar sobre el pueblo":
-            screen.blit(images["img_castillo"], (0, 0))
-            draw_text("Fuiste al castillo y en la puerta habia un gigante monstruoso, parecia ser el portero de este", 50, 100)
-            draw_text("1. Hablar con el monstruo", 50, 150)
-            draw_text("2. Intentar pelear con el con tus habilidades magicas", 50, 200)
-        elif self.state == "Hablar con el monstruo":
-            draw_text("Te acercas para hablar con el monstruo, en tu platica te habla del reino Puertero: Este reino se formo hace /'¿*0'¿/0' *ilegible* años, todo era pascifico hasta que el vasio se apodero de las fonteras del reino", 50, 100)
-            draw_text("Segun la profecia un guerrero de aura carmesi nos librara de este fatidico final, y tal parece que ese eres tu.", 50, 150)
-            draw_text("Zhongli: YO!? De que hablas? soy un heroe de la superficie no de las catacumbas del sub-suelo", 50, 200)
-        elif self.state == "":
-            draw_text("", 50, 50)
-        elif self.state == "":
-            screen.blit(images[""], (0, 0))
-            draw_text("", 50, 100)
-        elif self.state == "":
-            draw_text("", 50, 50)
-            
-        pygame.display.update()
+        state_texts = {
+            "Iniciar el Crono": [
+                "Caíste de una altura muy alta, estás conmocionado y parece que estás herido internamente",
+                "Recuerdas quién eres de golpe, Zhongli, exacto, eres el héroe legendario de la superficie",
+                "Zhongli: claro, ahora lo recuerdo, estaba de expedición cuando una brecha de portal",
+                "me absorbió al sub-suelo, es bastante diferente a las leyendas...",
+                "Zhongli: Bueno, será mejor que comience a caminar por acá, hace frío a decir verdad...",
+                "Opciones del destino", "1. Buscar una salida", "2. Explorar las catacumbas abandonadas del sub-suelo, (CAERLEON)"
+            ],
+            "buscar una salida": [
+                "Te perdiste buscando la salida, sientes el frío comenzando a afectarte poco a poco...",
+                "1. Rendirte ante el frío", "2. Seguir buscando una salida"
+            ],
+            "Explorar las catacumbas abandonadas del sub-suelo, (CAERLEON)": [
+                "Ves una luz al final del túnel, deseas ir hacia ella?",
+                "1. Ir hacia la luz", "2. Retroceder para buscar la salida"
+            ],
+            "Rendirte ante el frío": ["Moriste congelado"],
+            "Seguir buscando una salida": [
+                "A pesar de tu desespere de buscar la salida te perdiste en el vacio de la fronteras",
+                "Sientes como la obscuridad te consume tu alma y finalmente te dejas consumir..."
+            ],
+            "Rechazar su oferta": [
+                "Ah, es una lastima, total iba a consumir tu alma...",
+                "El caballero te atraveso robandote el alma..."
+            ],
+            "Ir hacia la luz": [
+                "Caes encima de la ciudad, es enorme y repleta de monstruos como personas, ves un puesto",
+                "de comida a lo lejos y un castillo algo tétrico",
+                "1. Ir a comer algo al puesto de comida", "2. Ir hacia el castillo a investigar sobre el pueblo"
+            ],
+            "Retroceder para buscar la salida": [
+                "Caballero desconocido: hey, que haces aca pequeño humano?",
+                "Zhongli: e-eh nada, justo me estaba por ir, adios",
+                "Nah, tu no te vas... unete a mi chico, hazme caso...",
+                "1. Aceptar su invitacion", "2. Rechazar su oferta"
+            ],
+            "Aceptar su invitacion": [
+                "Sientes como se consume tu alma, el caballero se hace mas poderoso..."
+            ],
+            "Ir a comer algo al puesto de comida": [
+                "Fuiste a comer al puesto de comida, eventualmente te sentiste mal y explotaste."
+            ],
+            "Ir hacia el castillo a investigar sobre el pueblo": [
+                "Llegaste al castillo, es inmenso y repleto de estatuas en forma de monstruos",
+                "Encuentras un monstruo de caballería",
+                "1. Hablar con el monstruo", "2. Intentar pelear con el con tus habilidades mágicas"
+            ],
+            "Hablar con el monstruo": [
+                "Te acercas para hablar con el monstruo, en tu plática te habla del reino Puertero: Este reino se formó hace ",
+                "*ilegible* años, todo era pacífico hasta que el vacío se apoderó de las fronteras del reino",
+                "Según la profecía un guerrero de aura carmesí nos librará de este fatídico final, y tal parece que ese eres tú.",
+                "Zhongli: ¿YO!? ¿De qué hablas? soy un héroe de la superficie no de las catacumbas del sub-suelo",
+                "1. Ayudar con la profesia", "2. Irse del lugar"
+            ],
+            "Intentar pelear con el con tus habilidades mágicas": [
+                "El monstruo acabó contigo en tan solo un movimiento de brazo, patético"
+            ],
+            "Irse del lugar": [
+                "Decides irte sin embargo el monstruo te ataca con su arma atravesándote"
+            ],
+            "Ayudar con la profesia": [
+                "Perfecto, pasa adelante, mi rey te espera dentro, antes toma esto...",
+                "Te entregó una espada legendaria...",
+                "1. Ir hacia el rey"
+            ],
+            "Ir hacia el rey": [
+                "Al llegar al salón real, el rey te observa atentamente.",
+                "Zhongli: Rey, soy el héroe de la superficie y estoy aquí para ayudar con la profecía.",
+                "Rey: Héroe de la superficie, nos has encontrado en tiempos oscuros. La corrupción se ha propagado por todo el reino.",
+                "Zhongli: Dime, Rey, ¿qué debo hacer para liberar al reino de esta corrupción?",
+                "Rey: Debes aventurarte a las fronteras y eliminar a los caballeros corruptos que las custodian.",
+                "1. Continuar tu camino", "2. Esperar al rey"
+            ],
+            "Continuar tu camino": [
+                "Sigues tu camino y te encuentras con un caballero monstruo corrupto.",
+                "Zhongli: Debo enfrentarlo y limpiar esta tierra de corrupción.",
+                "1. Atacar al caballero monstruo", "2. Esperar al rey"
+            ],
+            "Esperar al rey": [
+                "Rey: Antes de enfrentarte a los caballeros corruptos, debes fortalecer tu espíritu.",
+                "Zhongli: ¿Cómo puedo hacerlo, Rey?",
+                "Rey: Ayudando a los aldeanos y eliminando pequeñas amenazas en el reino.",
+                "1. Ayudar a eliminar la corrupción", "2. Negarse ya que no tienes nada que ver con ese reino"
+            ],
+            "Negarse ya que no tienes nada que ver con ese reino": [
+                "Al escuchar esto el rey le ordena a tu guardia de tu ejecucion"
+            ],
+            "Ayudar a eliminar la corrupción": [
+                "Luchas valientemente y eliminas a varios caballeros corruptos.",
+                "Zhongli: He eliminado a varios caballeros corruptos. ¿Qué más debo hacer?",
+                "Rey: Ahora debes enfrentarte a su líder, el caballero oscuro.",
+                "1. Ir a cumplir tu mision..."
+            ],
+            "Ir a cumplir tu mision...": [
+                "Te enfrentas al caballero oscuro en una batalla épica.",
+                "Zhongli: ¡Esta es la batalla final!",
+                "Con un golpe final, derrotas al caballero oscuro.",
+                "1. Proclamarse victorioso..."
+            ],
+            "Proclamarse victorioso...": [
+                "Legendary Ending. Victoria...",
+                "Zhongli: ¡He salvado al reino y cumplido la profecía!"
+            ]
+        }
 
-def game():
-    game_state = GameState()
+        for idx, text in enumerate(state_texts.get(self.state, [])):
+            draw_text(text, 50, 30 + idx * 30)
+
+game_state = GameState()
+
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        game_state.handle_event(event)
     
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            game_state.handle_event(event)
-        
-        game_state.show()
-        pygame.display.flip()
-
-game()
+    game_state.show()
+    pygame.display.update()
